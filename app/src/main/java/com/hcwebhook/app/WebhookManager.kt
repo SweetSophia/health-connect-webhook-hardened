@@ -155,8 +155,14 @@ class WebhookManager(
         if (text == null) return null
 
         return URL_REGEX.replace(text) { match ->
-            redactUrl(match.value)
+            val (trimmedUrl, trailingPunctuation) = splitTrailingPunctuation(match.value)
+            redactUrl(trimmedUrl) + trailingPunctuation
         }
+    }
+
+    private fun splitTrailingPunctuation(value: String): Pair<String, String> {
+        val trimmedUrl = value.trimEnd('.', ',', ';', ':', '!', '?', ')', '"', '\'', '’', '”')
+        return trimmedUrl to value.removePrefix(trimmedUrl)
     }
 
     companion object {
@@ -165,7 +171,7 @@ class WebhookManager(
         private const val INITIAL_RETRY_DELAY_MS = 1000L
         private const val MAX_LOG_ERROR_LENGTH = 300
         private const val REDACTED_URL_PLACEHOLDER = "<redacted>"
-        private val URL_REGEX = Regex("""https?://[^\s]+""")
+        private val URL_REGEX = Regex("""https?://[^\s<>"{}|\\^`\[\]]+""")
 
         fun isRetryableException(exception: IOException): Boolean {
             return when (exception) {
