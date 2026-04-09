@@ -148,13 +148,7 @@ class WebhookManager(
 
     private fun redactUrl(url: String): String {
         val parsed = url.toHttpUrlOrNull() ?: return REDACTED_URL_PLACEHOLDER
-        return parsed.newBuilder()
-            .username("")
-            .password("")
-            .query(null)
-            .fragment(null)
-            .build()
-            .toString()
+        return "${parsed.scheme}://${parsed.host}"
     }
 
     private fun redactSensitiveText(text: String?): String? {
