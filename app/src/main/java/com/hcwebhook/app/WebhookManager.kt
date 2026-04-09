@@ -122,7 +122,7 @@ class WebhookManager(
     }
 
     private fun redactUrl(url: String): String {
-        val parsed = url.toHttpUrlOrNull() ?: return url
+        val parsed = url.toHttpUrlOrNull() ?: return REDACTED_URL_PLACEHOLDER
         return parsed.newBuilder()
             .username("")
             .password("")
@@ -136,5 +136,6 @@ class WebhookManager(
         private const val MAX_RETRIES = 3
         private const val INITIAL_RETRY_DELAY_MS = 1000L
         private const val MAX_LOG_ERROR_LENGTH = 300
+        private const val REDACTED_URL_PLACEHOLDER = "<redacted>"
     }
 }
