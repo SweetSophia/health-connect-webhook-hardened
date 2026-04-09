@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-   Exclude app preferences from Auto Backup because they contain webhook
+   Exclude webhook preferences from Auto Backup because they contain webhook
    endpoints and may contain auth headers.
 -->
 <full-backup-content>

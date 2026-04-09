@@ -18,9 +18,11 @@ class SyncWorker(
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
             val syncResult = syncManager.performSync()
+            val syncError = syncResult.exceptionOrNull()
             when {
                 syncResult.isSuccess -> Result.success()
-                syncResult.isFailure -> mapFailure(syncResult.exceptionOrNull())
+                syncError is CancellationException -> throw syncError
+                syncResult.isFailure -> mapFailure(syncError)
                 else -> Result.success() // No data case
             }
         } catch (e: CancellationException) {

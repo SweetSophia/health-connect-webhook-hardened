@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-   Exclude app preferences from cloud backup and device transfer because they
-   contain webhook endpoints and may contain auth headers.
+   Exclude webhook preferences from cloud backup and device transfer because
+   they contain webhook endpoints and may contain auth headers.
 -->
 <data-extraction-rules>
     <cloud-backup>
