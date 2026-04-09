@@ -1,6 +1,7 @@
 package com.hcwebhook.app
 
 import android.content.Context
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -109,10 +110,10 @@ class WebhookManager(
             val log = WebhookLog(
                 id = UUID.randomUUID().toString(),
                 timestamp = timestamp,
-                url = url,
+                url = redactUrl(url),
                 statusCode = statusCode,
                 success = success,
-                errorMessage = errorMessage,
+                errorMessage = errorMessage?.take(MAX_LOG_ERROR_LENGTH),
                 dataType = dataType,
                 recordCount = recordCount
             )
@@ -120,9 +121,20 @@ class WebhookManager(
         }
     }
 
+    private fun redactUrl(url: String): String {
+        val parsed = url.toHttpUrlOrNull() ?: return url
+        return parsed.newBuilder()
+            .username("")
+            .password("")
+            .query(null)
+            .build()
+            .toString()
+    }
+
     companion object {
         private const val TIMEOUT_SECONDS = 60L
         private const val MAX_RETRIES = 3
         private const val INITIAL_RETRY_DELAY_MS = 1000L
+        private const val MAX_LOG_ERROR_LENGTH = 300
     }
 }
