@@ -49,7 +49,7 @@ class WebhookManager(
             if (result.isSuccess) {
                 return result // Success if at least one webhook succeeds
             } else {
-                lastFailure = result.exceptionOrNull() as? Exception ?: Exception("Unknown error")  
+                lastFailure = result.exceptionOrNull() as? Exception ?: Exception("Unknown error")
             }
         }
 
@@ -67,12 +67,12 @@ class WebhookManager(
             val requestBuilder = Request.Builder()
                 .url(config.url)
                 .post(requestBody)
-            
+
             // Add custom headers
             config.headers.forEach { (key, value) ->
                 requestBuilder.addHeader(key, value)
             }
-            
+
             val request = requestBuilder.build()
 
             var lastException: Exception? = null
@@ -138,7 +138,7 @@ class WebhookManager(
                 url = redactUrl(url),
                 statusCode = statusCode,
                 success = success,
-                errorMessage = errorMessage?.take(MAX_LOG_ERROR_LENGTH),
+                errorMessage = redactSensitiveText(errorMessage)?.take(MAX_LOG_ERROR_LENGTH),
                 dataType = dataType,
                 recordCount = recordCount
             )
@@ -157,22 +157,31 @@ class WebhookManager(
             .toString()
     }
 
+    private fun redactSensitiveText(text: String?): String? {
+        if (text == null) return null
+
+        return URL_REGEX.replace(text) { match ->
+            redactUrl(match.value)
+        }
+    }
+
     companion object {
         private const val TIMEOUT_SECONDS = 60L
         private const val MAX_RETRIES = 3
         private const val INITIAL_RETRY_DELAY_MS = 1000L
         private const val MAX_LOG_ERROR_LENGTH = 300
         private const val REDACTED_URL_PLACEHOLDER = "<redacted>"
-    }
+        private val URL_REGEX = Regex("""https?://[^\s]+""")
 
-    fun isRetryableException(exception: IOException): Boolean {
-        return when (exception) {
-            is HttpResponseException -> exception.statusCode >= 500
-            is SocketTimeoutException -> true
-            is UnknownHostException -> true
-            is SSLException -> false
-            is ProtocolException -> false
-            else -> true
+        fun isRetryableException(exception: IOException): Boolean {
+            return when (exception) {
+                is HttpResponseException -> exception.statusCode >= 500
+                is SocketTimeoutException -> true
+                is UnknownHostException -> true
+                is SSLException -> false
+                is ProtocolException -> false
+                else -> true
+            }
         }
     }
 }
