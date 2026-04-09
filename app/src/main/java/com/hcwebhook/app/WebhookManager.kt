@@ -152,6 +152,7 @@ class WebhookManager(
             .username("")
             .password("")
             .query(null)
+            .fragment(null)
             .build()
             .toString()
     }
